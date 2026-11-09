@@ -27,8 +27,8 @@ app.post('/webhook/telegram', async (c) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: chatId,
-                    text: userText
-                })
+                    text: userText,
+                }),
             });
             if (!response.ok) {
                 console.error('Telegram API error:', await response.text());
@@ -49,7 +49,7 @@ app.post('/setup-webhook', async (c) => {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_WEBHOOK_URL) {
         return c.json({
             error: 'Missing environment variables',
-            required: ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_WEBHOOK_URL']
+            required: ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_WEBHOOK_URL'],
         }, 400);
     }
     try {
@@ -57,7 +57,7 @@ app.post('/setup-webhook', async (c) => {
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: webhookUrl })
+            body: JSON.stringify({ url: webhookUrl }),
         });
         const result = await response.json();
         return c.json(result);
@@ -87,7 +87,7 @@ app.get('/webhook-info', async (c) => {
 if (!process.env.VERCEL) {
     serve({
         fetch: app.fetch,
-        port: Number(process.env.PORT) || 3000
+        port: Number(process.env.PORT) || 3000,
     }, (info) => {
         console.log(`Server is running on http://localhost:${info.port}`);
     });
