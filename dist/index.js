@@ -1,5 +1,7 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
+import { generateText } from 'ai';
+import { google } from '@ai-sdk/google';
 const app = new Hono();
 // Environment variables
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -10,7 +12,7 @@ app.get('/', (c) => {
 app.get('/marco', (c) => {
     return c.text('polo');
 });
-// Telegram webhook endpoint - echoes back whatever the user sends
+// Telegram webhook endpoint - uses Gemini AI to respond
 app.post('/webhook/telegram', async (c) => {
     if (!TELEGRAM_BOT_TOKEN) {
         return c.json({ error: 'TELEGRAM_BOT_TOKEN not configured' }, 500);
@@ -21,13 +23,19 @@ app.post('/webhook/telegram', async (c) => {
         if (update.message?.text) {
             const chatId = update.message.chat.id;
             const userText = update.message.text;
-            // Send the same text back to the user
+            // Generate AI response using Gemini
+            const { text } = await generateText({
+                model: google('gemini-2.0-flash-exp'),
+                prompt: userText,
+            });
+            console.log('Gemini response:', text);
+            // Send AI response back to the user
             const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: chatId,
-                    text: userText,
+                    text: text,
                 }),
             });
             if (!response.ok) {
