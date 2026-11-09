@@ -32,9 +32,13 @@ app.post('/webhook/telegram', async (c) => {
       const userText = update.message.text;
 
       // Generate AI response using Gemini
+      // maxRetries: 0 — Google free-tier quota is the bottleneck; SDK-level
+      // retries burn 3x quota per Telegram delivery. Telegram retries the
+      // whole delivery on webhook failure anyway, so fail fast instead.
       const { text } = await generateText({
         model: google('gemini-flash-latest'),
         prompt: userText,
+        maxRetries: 0,
       });
 
       console.log('Gemini response:', text);
