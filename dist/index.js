@@ -25,7 +25,7 @@ app.post('/webhook/telegram', async (c) => {
             const userText = update.message.text;
             // Generate AI response using Gemini
             const { text } = await generateText({
-                model: google('gemini-3.8-flash'),
+                model: google('gemini-3.8-flash-lite'),
                 prompt: userText,
             });
             console.log('Gemini response:', text);
