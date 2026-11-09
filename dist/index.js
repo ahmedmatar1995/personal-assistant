@@ -12,6 +12,25 @@ app.get('/', (c) => {
 app.get('/marco', (c) => {
     return c.text('polo');
 });
+// TEMP debug: list Google models actually available to this key (remove after)
+app.get('/ai-models', async (c) => {
+    const key = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    if (!key)
+        return c.json({ error: 'GOOGLE_GENERATIVE_AI_API_KEY not configured' }, 500);
+    try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=1000`);
+        const data = await res.json();
+        const models = (data.models ?? []).map((m) => ({
+            name: m.name,
+            generates: m.supportedGenerationMethods?.includes('generateContent') ?? false,
+        }));
+        return c.json({ httpStatus: res.status, models });
+    }
+    catch (error) {
+        console.error('ListModels error:', error);
+        return c.json({ error: 'ListModels failed' }, 500);
+    }
+});
 // Telegram webhook endpoint - uses Gemini AI to respond
 app.post('/webhook/telegram', async (c) => {
     if (!TELEGRAM_BOT_TOKEN) {
