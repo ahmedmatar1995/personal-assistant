@@ -1,0 +1,46 @@
+# ============================================================
+
+# .dockerignore — keeps files out of the Docker build context
+
+# (applies when a Dockerfile builds FROM this directory)
+
+# ============================================================
+
+# --- Agent tooling (requested): AI config must not ship in images ---
+
+.agents
+.claude
+.zcode
+skills-lock.json
+
+# --- Dependencies: reinstalled inside the container ---
+
+node_modules
+
+# --- Repo metadata / local tool state ---
+
+.git
+.gitignore
+.vercel
+
+# --- Secrets: never bake into an image ---
+
+.env\*
+
+# --- Build artifacts: rebuilt by the container build stage ---
+
+dist
+coverage
+.nyc_output
+
+# --- Docker's own files ---
+
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# --- Misc ---
+
+_.log
+.DS_Store
+_.md
