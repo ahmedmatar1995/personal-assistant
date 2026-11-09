@@ -33,7 +33,7 @@ app.post('/webhook/telegram', async (c) => {
 
       // Generate AI response using Gemini
       const { text } = await generateText({
-        model: google('gemini-2.0-flash-exp'),
+        model: google('gemini-3.8-flash'),
         prompt: userText,
       });
 
