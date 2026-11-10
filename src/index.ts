@@ -31,17 +31,7 @@ app.post('/webhook/telegram', async (c) => {
       const chatId = update.message.chat.id;
       const userText = update.message.text;
 
-      // Generate AI response using Gemini
-      // maxRetries: 0 — Google free-tier quota is the bottleneck; SDK-level
-      // retries burn 3x quota per Telegram delivery. Telegram retries the
-      // whole delivery on webhook failure anyway, so fail fast instead.
-      const { text } = await generateText({
-        model: google('gemini-flash-latest'),
-        prompt: userText,
-        maxRetries: 0,
-      });
-
-      console.log('Gemini response:', text);
+      const text = await generateReply(userText);
 
       // Send AI response back to the user
       const response = await fetch(
@@ -58,19 +48,46 @@ app.post('/webhook/telegram', async (c) => {
 
       if (!response.ok) {
         console.error('Telegram API error:', await response.text());
-        return c.json({ error: 'Failed to send message' }, 500);
       }
-
-      return c.json({ ok: true });
     }
-
-    // Acknowledge other update types without action
-    return c.json({ ok: true });
   } catch (error) {
     console.error('Webhook error:', error);
-    return c.json({ error: 'Internal server error' }, 500);
   }
+
+  // Always answer 200: a non-2xx makes Telegram redeliver the same update
+  // over and over, which burns Gemini quota and floods the logs.
+  return c.json({ ok: true });
 });
+
+// Free-tier Gemini quotas are per model (~20 requests/day each), and some
+// models are intermittently overloaded (503). Try models in order and fall
+// through to the next one when a model is out of quota or unavailable.
+const GEMINI_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-flash-latest',
+];
+
+async function generateReply(prompt: string): Promise<string> {
+  for (const modelId of GEMINI_MODELS) {
+    try {
+      const { text } = await generateText({
+        model: google(modelId),
+        prompt,
+        maxRetries: 0,
+      });
+      console.log(`Gemini (${modelId}) replied`);
+      return text || '(empty reply)';
+    } catch (error) {
+      const status = (error as { statusCode?: number }).statusCode;
+      console.warn(`Gemini ${modelId} failed (status ${status ?? 'n/a'})`);
+      // Anything other than quota / overload / unknown model is a real bug.
+      if (status !== 429 && status !== 503 && status !== 404) throw error;
+    }
+  }
+  return 'Sorry, the AI is out of free quota right now. Please try again later.';
+}
 
 // Endpoint to set up the webhook (call this once to register your webhook with Telegram)
 app.post('/setup-webhook', async (c) => {
