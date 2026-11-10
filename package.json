@@ -2,7 +2,7 @@
   "name": "ai-agent",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js"
   },

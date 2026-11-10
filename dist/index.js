@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
-import { generateText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { runs, tasks } from '@trigger.dev/sdk';
+import { generateReply } from './lib/ai.js';
 const app = new Hono();
 // Environment variables
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -11,6 +11,48 @@ app.get('/', (c) => {
 });
 app.get('/marco', (c) => {
     return c.text('polo');
+});
+// ---------------------------------------------------------------------------
+// TEMPORARY public test endpoint — remove before launch (also delete
+// src/trigger/generate-text.ts). Unauthenticated: anyone can spend Gemini
+// quota through it, so keep it short-lived.
+//
+//   GET /test/ai?prompt=Tell%20me%20a%20joke
+//
+// Triggers the "generate-text" Trigger.dev task and waits for its output.
+// ---------------------------------------------------------------------------
+const TEST_PROMPT_MAX_LENGTH = 500;
+app.get('/test/ai', async (c) => {
+    const prompt = (c.req.query('prompt') ?? 'Say hello in one short sentence.').trim();
+    if (!prompt)
+        return c.json({ error: 'prompt must not be empty' }, 400);
+    if (prompt.length > TEST_PROMPT_MAX_LENGTH) {
+        return c.json({ error: `prompt must be at most ${TEST_PROMPT_MAX_LENGTH} characters` }, 400);
+    }
+    if (!process.env.TRIGGER_SECRET_KEY) {
+        return c.json({ error: 'TRIGGER_SECRET_KEY not configured' }, 500);
+    }
+    try {
+        const handle = await tasks.trigger('generate-text', { prompt });
+        // Wait up to ~50s for the run to finish (Vercel functions time out after 60s).
+        const deadline = Date.now() + 50_000;
+        while (Date.now() < deadline) {
+            const run = await runs.retrieve(handle.id);
+            if (run.isCompleted) {
+                if (run.isSuccess && run.output) {
+                    return c.json({ prompt, text: run.output.text, model: run.output.model, runId: run.id });
+                }
+                return c.json({ error: `Run finished with status ${run.status}`, runId: run.id }, 502);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+        // Still queued/running (e.g. `trigger dev` isn't running): hand back the id.
+        return c.json({ status: 'pending', runId: handle.id, message: 'Run has not finished yet' }, 202);
+    }
+    catch (error) {
+        console.error('Test AI endpoint error:', error);
+        return c.json({ error: 'Failed to trigger the task' }, 500);
+    }
 });
 // Telegram webhook endpoint - uses Gemini AI to respond
 app.post('/webhook/telegram', async (c) => {
@@ -23,7 +65,7 @@ app.post('/webhook/telegram', async (c) => {
         if (update.message?.text) {
             const chatId = update.message.chat.id;
             const userText = update.message.text;
-            const text = await generateReply(userText);
+            const { text } = await generateReply(userText);
             // Send AI response back to the user
             const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
@@ -45,36 +87,6 @@ app.post('/webhook/telegram', async (c) => {
     // over and over, which burns Gemini quota and floods the logs.
     return c.json({ ok: true });
 });
-// Free-tier Gemini quotas are per model (~20 requests/day each), and some
-// models are intermittently overloaded (503). Try models in order and fall
-// through to the next one when a model is out of quota or unavailable.
-const GEMINI_MODELS = [
-    'gemini-3.5-flash-lite',
-    'gemini-3.1-flash-lite',
-    'gemini-flash-lite-latest',
-    'gemini-flash-latest',
-];
-async function generateReply(prompt) {
-    for (const modelId of GEMINI_MODELS) {
-        try {
-            const { text } = await generateText({
-                model: google(modelId),
-                prompt,
-                maxRetries: 0,
-            });
-            console.log(`Gemini (${modelId}) replied`);
-            return text || '(empty reply)';
-        }
-        catch (error) {
-            const status = error.statusCode;
-            console.warn(`Gemini ${modelId} failed (status ${status ?? 'n/a'})`);
-            // Anything other than quota / overload / unknown model is a real bug.
-            if (status !== 429 && status !== 503 && status !== 404)
-                throw error;
-        }
-    }
-    return 'Sorry, the AI is out of free quota right now. Please try again later.';
-}
 // Endpoint to set up the webhook (call this once to register your webhook with Telegram)
 app.post('/setup-webhook', async (c) => {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_WEBHOOK_URL) {
