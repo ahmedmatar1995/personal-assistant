@@ -40,14 +40,23 @@ app.get('/test/ai', async (c) => {
             const run = await runs.retrieve(handle.id);
             if (run.isCompleted) {
                 if (run.isSuccess && run.output) {
-                    return c.json({ prompt, text: run.output.text, model: run.output.model, runId: run.id });
+                    return c.json({
+                        prompt,
+                        text: run.output.text,
+                        model: run.output.model,
+                        runId: run.id,
+                    });
                 }
                 return c.json({ error: `Run finished with status ${run.status}`, runId: run.id }, 502);
             }
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
         // Still queued/running (e.g. `trigger dev` isn't running): hand back the id.
-        return c.json({ status: 'pending', runId: handle.id, message: 'Run has not finished yet' }, 202);
+        return c.json({
+            status: 'pending',
+            runId: handle.id,
+            message: 'Run has not finished yet',
+        }, 202);
     }
     catch (error) {
         console.error('Test AI endpoint error:', error);

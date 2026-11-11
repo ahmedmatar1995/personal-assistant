@@ -30,17 +30,25 @@ app.get('/marco', (c) => {
 const TEST_PROMPT_MAX_LENGTH = 500;
 
 app.get('/test/ai', async (c) => {
-  const prompt = (c.req.query('prompt') ?? 'Say hello in one short sentence.').trim();
+  const prompt = (
+    c.req.query('prompt') ?? 'Say hello in one short sentence.'
+  ).trim();
   if (!prompt) return c.json({ error: 'prompt must not be empty' }, 400);
   if (prompt.length > TEST_PROMPT_MAX_LENGTH) {
-    return c.json({ error: `prompt must be at most ${TEST_PROMPT_MAX_LENGTH} characters` }, 400);
+    return c.json(
+      { error: `prompt must be at most ${TEST_PROMPT_MAX_LENGTH} characters` },
+      400
+    );
   }
   if (!process.env.TRIGGER_SECRET_KEY) {
     return c.json({ error: 'TRIGGER_SECRET_KEY not configured' }, 500);
   }
 
   try {
-    const handle = await tasks.trigger<typeof generateTextTask>('generate-text', { prompt });
+    const handle = await tasks.trigger<typeof generateTextTask>(
+      'generate-text',
+      { prompt }
+    );
 
     // Wait up to ~50s for the run to finish (Vercel functions time out after 60s).
     const deadline = Date.now() + 50_000;
@@ -48,15 +56,30 @@ app.get('/test/ai', async (c) => {
       const run = await runs.retrieve<typeof generateTextTask>(handle.id);
       if (run.isCompleted) {
         if (run.isSuccess && run.output) {
-          return c.json({ prompt, text: run.output.text, model: run.output.model, runId: run.id });
+          return c.json({
+            prompt,
+            text: run.output.text,
+            model: run.output.model,
+            runId: run.id,
+          });
         }
-        return c.json({ error: `Run finished with status ${run.status}`, runId: run.id }, 502);
+        return c.json(
+          { error: `Run finished with status ${run.status}`, runId: run.id },
+          502
+        );
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     // Still queued/running (e.g. `trigger dev` isn't running): hand back the id.
-    return c.json({ status: 'pending', runId: handle.id, message: 'Run has not finished yet' }, 202);
+    return c.json(
+      {
+        status: 'pending',
+        runId: handle.id,
+        message: 'Run has not finished yet',
+      },
+      202
+    );
   } catch (error) {
     console.error('Test AI endpoint error:', error);
     return c.json({ error: 'Failed to trigger the task' }, 500);
@@ -104,7 +127,6 @@ app.post('/webhook/telegram', async (c) => {
   // over and over, which burns Gemini quota and floods the logs.
   return c.json({ ok: true });
 });
-
 
 // Endpoint to set up the webhook (call this once to register your webhook with Telegram)
 app.post('/setup-webhook', async (c) => {
