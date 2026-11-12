@@ -19,4 +19,12 @@ export default defineConfig({
     },
   },
   dirs: ['./src/trigger'],
+  build: {
+    // @daytona/sdk does runtime dynamic imports (e.g. import('form-data') in
+    // FileSystem.uploadFile) that the bundler can't trace — bundling it made
+    // those imports fail with "Cannot find module 'form-data'" on the deployed
+    // runtime. Keep it external so it (and its deps) load from real
+    // node_modules in the deployed image.
+    external: ['@daytona/sdk'],
+  },
 });
