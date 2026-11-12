@@ -26,7 +26,42 @@ export interface TelegramUpdate {
     chat: { id: number; type: string };
     from?: { id: number; first_name: string; username?: string };
     text?: string;
+    // Caption on media messages (photo/document/video/…) — acts as the user's text.
+    caption?: string;
     date: number;
+    // Attachments: Telegram sends references (file_id), never the bytes.
+    // The agent downloads the bytes itself via getFile → /file/bot<token>/<path>.
+    photo?: Array<{
+      file_id: string;
+      file_size?: number;
+      width: number;
+      height: number;
+    }>;
+    document?: {
+      file_id: string;
+      file_name?: string;
+      mime_type?: string;
+      file_size?: number;
+    };
+    audio?: {
+      file_id: string;
+      mime_type?: string;
+      file_size?: number;
+      duration?: number;
+    };
+    voice?: {
+      file_id: string;
+      mime_type?: string;
+      file_size?: number;
+      duration?: number;
+    };
+    video?: {
+      file_id: string;
+      mime_type?: string;
+      file_size?: number;
+      duration?: number;
+    };
+    video_note?: { file_id: string; file_size?: number; duration?: number };
   };
 }
 

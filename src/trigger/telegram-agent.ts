@@ -19,6 +19,7 @@ import { stepCountIs } from 'ai';
 import { google } from '@ai-sdk/google';
 import { telegramEndpoint, type TelegramUpdate } from './telegram-webhook.js';
 import { webSearchTool } from './tools/web-search.js';
+import { processFileTool, runCodeTool } from './tools/daytona-file.js';
 
 // ---------------------------------------------------------------------------
 // Gemini model fallback list (free-tier, tested)
@@ -63,10 +64,53 @@ const telegramChannel = chat.channels.custom({
   key: '{event.message.chat.id}',
 
   // Map the Telegram Update to the message text the agent receives.
-  // Return '' to skip non-text updates — the runtime skips turns for empty messages.
+  // Attachments are described inline (with their file_id) so the agent can
+  // fetch and parse them via the Daytona tools; return '' to skip updates
+  // with nothing actionable (edits, stickers, pure media without caption is
+  // still kept as an attachment line).
   inbound: (event) => {
-    if (!event.message?.text) return '';
-    return event.message.text;
+    const msg = event.message;
+    if (!msg) return '';
+
+    const parts: string[] = [];
+
+    if (msg.photo?.length) {
+      const photo = msg.photo[msg.photo.length - 1]!;
+      parts.push(
+        `[image attached: ${photo.width}x${photo.height}${photo.file_size ? `, ${photo.file_size} bytes` : ''}, file_id=${photo.file_id}]`
+      );
+    }
+    if (msg.document) {
+      parts.push(
+        `[document attached: name=${msg.document.file_name ?? 'unknown'}, mime=${msg.document.mime_type ?? 'unknown'}, size=${msg.document.file_size ?? 'unknown'}, file_id=${msg.document.file_id}]`
+      );
+    }
+    if (msg.voice) {
+      parts.push(
+        `[voice message attached: ${msg.voice.duration ?? '?'}s, file_id=${msg.voice.file_id}]`
+      );
+    }
+    if (msg.audio) {
+      parts.push(
+        `[audio attached: mime=${msg.audio.mime_type ?? 'unknown'}, file_id=${msg.audio.file_id}]`
+      );
+    }
+    if (msg.video) {
+      parts.push(
+        `[video attached: mime=${msg.video.mime_type ?? 'unknown'}, file_id=${msg.video.file_id}]`
+      );
+    }
+    if (msg.video_note) {
+      parts.push(
+        `[video note attached: ${msg.video_note.duration ?? '?'}s, file_id=${msg.video_note.file_id}]`
+      );
+    }
+
+    // Caption (on media) or text (plain messages) — the user's actual request.
+    if (msg.caption) parts.push(msg.caption);
+    if (msg.text) parts.push(msg.text);
+
+    return parts.join('\n');
   },
 
   // Bind the session so replies still work after the event is gone.
@@ -103,6 +147,8 @@ const telegramChannel = chat.channels.custom({
 // Define tools once, reuse across turns
 const tools = {
   webSearch: webSearchTool,
+  processFile: processFileTool,
+  runCode: runCodeTool,
 };
 
 export const telegramAgent = chat.agent({
@@ -135,11 +181,19 @@ export const telegramAgent = chat.agent({
           abortSignal: signal,
           stopWhen: stepCountIs(10),
           maxRetries: 0,
-          system: `You are a helpful AI assistant with access to real-time web information.
+          system: `You are a helpful AI assistant with access to real-time web information and a cloud sandbox for files and code.
 
 Your capabilities:
 - Answer general questions using your training knowledge
 - Search the web when you need current information, facts, or verification
+- Read files the user attaches (PDF, Word, Excel, CSV, plain text/code; OCR for images) via the processFile tool
+- Run Python or TypeScript code in a secure cloud sandbox via the runCode tool (calculations, data analysis, working with attached files)
+
+File handling rules:
+- When a message contains an attachment line like [document attached: … file_id=…] or [image attached: … file_id=…], call processFile with that exact file_id to read the file BEFORE answering anything about its contents.
+- For analysis or computation on an attached file, use runCode with the same file_id; the file lands at /home/daytona/upload/<original name>.
+- Voice/audio/video attachments cannot be transcribed — tell the user you can't process audio yet and ask for text.
+- If processFile or runCode returns an error, explain briefly in plain words what went wrong.
 
 When to use web search:
 - Current events, news, or recent happenings
@@ -161,7 +215,7 @@ Important guidelines:
 - If search results are empty or irrelevant, acknowledge it and offer to try a different query
 - Cite sources when using web search results: mention the website or page title
 - Keep responses concise - this is a messaging app, not a document
-- Never mention "Firecrawl" or technical implementation details to users`,
+- Never mention "Firecrawl", "Daytona", or technical implementation details to users`,
         });
       } catch (error) {
         const status = (error as { statusCode?: number }).statusCode;
