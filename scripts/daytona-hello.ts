@@ -16,7 +16,7 @@ async function main() {
       'DAYTONA_API_KEY is not set.\n\n' +
         '1. Create an API key at https://app.daytona.io/dashboard/keys\n' +
         '2. Add it to .env as: DAYTONA_API_KEY=<your key>\n' +
-        '3. Run this script again: bun scripts/daytona-hello.ts',
+        '3. Run this script again: bun scripts/daytona-hello.ts'
     );
     process.exit(1);
   }

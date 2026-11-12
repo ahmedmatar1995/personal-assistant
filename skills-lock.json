@@ -1,35 +1,41 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "ai-sdk": {
       "source": "vercel/ai",
       "sourceType": "github",
       "skillPath": "skills/use-ai-sdk/SKILL.md",
-      "computedHash": "d6910e7d8bb527d2823ba58b6225b304ae649c135fc7e43ec2d2152251c218db"
+      "computedHash": "59cd2dc82c5458f2819992fc3d27204ed16edfc9170870c6f8f04c44bac17772"
+    },
+    "daytona": {
+      "source": "daytona/skills",
+      "sourceType": "github",
+      "skillPath": "skills/daytona/SKILL.md",
+      "computedHash": "c9253ef3e3bd9683a5e99eadffae395a2e5f37ba4f1fa4392adc328ea2eb3b45"
     },
     "hono": {
       "source": "honojs/skills",
       "sourceType": "github",
       "skillPath": "skills/hono/SKILL.md",
-      "computedHash": "f469bac28a53d010bb47bd61109d0cfebe9a4f3fd407310746114549886b5870"
+      "computedHash": "b9aa6ed86fce02216f2f43c4b5c651ba0055f0785a568d84fc446721fc832172"
     },
     "hono-jsx": {
       "source": "honojs/skills",
       "sourceType": "github",
       "skillPath": "skills/hono-jsx/SKILL.md",
-      "computedHash": "6b021dcdf7aab408d483ed6f8f679390c43085f830448578eb41bf43adc3cda4"
+      "computedHash": "1654a017075171f1c22809bd897bfe2eb698129ec67664511825448c3d897d27"
     },
     "hono-void": {
       "source": "honojs/skills",
       "sourceType": "github",
       "skillPath": "skills/hono-void/SKILL.md",
-      "computedHash": "6bf0af0419a674d8713ab2426c33b66fc296ef34dd5b5bc2b5ce6948d5044f1a"
+      "computedHash": "c3204abed1d0a65d245080431f683650171e685f2b81ab86522547d1691aa4ea"
     },
     "migrate-ai-sdk-v6-to-v7": {
       "source": "vercel/ai",
       "sourceType": "github",
       "skillPath": "skills/migrate-ai-sdk-v6-to-v7/SKILL.md",
-      "computedHash": "4a15e387756ee32d76805fe5f3fbd368a216dda4e6e9cc24b803efaa8c3381e4"
+      "computedHash": "1b2e1de680feb538876987eaa8bbbb137c697a6eb841e38f8bd0d6a7dd5b19d3"
     }
   }
 }
