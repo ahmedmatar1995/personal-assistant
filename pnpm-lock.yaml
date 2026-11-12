@@ -27,8 +27,8 @@ importers:
         specifier: ^2.1.3
         version: 2.1.3
       '@trigger.dev/sdk':
-        specifier: 4.8.4
-        version: 4.8.4(ai@7.0.166(zod@4.6.7))(zod@4.6.7)
+        specifier: 4.8.5
+        version: 4.8.5(ai@7.0.166(zod@4.6.7))(zod@4.6.7)
       ai:
         specifier: ^7.0.166
         version: 7.0.166(zod@4.6.7)
@@ -37,8 +37,8 @@ importers:
         version: 4.13.17
     devDependencies:
       '@trigger.dev/build':
-        specifier: 4.8.4
-        version: 4.8.4(typescript@7.0.2)(zod@4.6.7)
+        specifier: 4.8.5
+        version: 4.8.5(typescript@7.0.2)(zod@4.6.7)
       '@types/node':
         specifier: ^26.1.1
         version: 26.6.6
@@ -837,8 +837,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@trigger.dev/build@4.8.4':
-    resolution: {integrity: sha512-ZtQPoWqEwne3P3dtnuWxrLEFAbtoCW131cY9ByPtVtBUq/KqdlZ4Lkvtqru8evsJLc+DPEEO1rPS/74EnbvQ3Q==}
+  '@trigger.dev/build@4.8.5':
+    resolution: {integrity: sha512-IJtmb6WCg9wG46MABOCmi9SNlZxT888CG6lIPF5/Ct2SJBULzTbKo99wHnnrVcNfN0hEXH3FwLtqTGdYRE/vPQ==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       '@typescript/typescript6': ^6.0.0
@@ -849,14 +849,14 @@ packages:
       typescript:
         optional: true
 
-  '@trigger.dev/core@4.8.4':
-    resolution: {integrity: sha512-l7XKQb3qfWJbFJVtCnZMqDVekeMYUbdf/Amf3LR0zOFuSDXKFCBDi7JXghm5JBKPVkrImhiiLigQUl7DtBX8rg==}
+  '@trigger.dev/core@4.8.5':
+    resolution: {integrity: sha512-3frwtaBtLz08uZyzxucVCHpd8Qd6Vek559/qREb78MKQMg3pd4LsmOeZjbKR0aINMtUztl6BmwRiBOYQxEc5fQ==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       zod: ^3.25.56 || ^4.0.0
 
-  '@trigger.dev/sdk@4.8.4':
-    resolution: {integrity: sha512-88hlBz3Myi7FeWE3/R8ufhr7a0mK77rFZs7t478Jqff/w/+8PjmHMKBeHiuU/XLJaWiltrEPT9hB+am/XqkbiQ==}
+  '@trigger.dev/sdk@4.8.5':
+    resolution: {integrity: sha512-pcBthE8C2NYyvLAAuawGC0kRBwF8DZjjkiDkXZjMD6RVFdaO0oTi2zjx9VqIMEGfPWM8vOmUIWyvQNkYL9WJ7Q==}
     engines: {node: '>=18.20.0'}
     peerDependencies:
       '@ai-sdk/otel': '>=1.0.0-0 <2'
@@ -2145,7 +2145,7 @@ snapshots:
   '@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/semantic-conventions': 1.41.1
+      '@opentelemetry/semantic-conventions': 1.45.0
 
   '@opentelemetry/core@3.0.0(@opentelemetry/api@1.10.0)':
     dependencies:
@@ -2345,7 +2345,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.41.1
+      '@opentelemetry/semantic-conventions': 1.45.0
 
   '@opentelemetry/resources@3.0.0(@opentelemetry/api@1.10.0)':
     dependencies:
@@ -2365,7 +2365,7 @@ snapshots:
       '@opentelemetry/api-logs': 0.219.0
       '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.8.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.41.1
+      '@opentelemetry/semantic-conventions': 1.45.0
 
   '@opentelemetry/sdk-logs@3.0.0(@opentelemetry/api@1.10.0)':
     dependencies:
@@ -2420,7 +2420,7 @@ snapshots:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.8.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.41.1
+      '@opentelemetry/semantic-conventions': 1.45.0
 
   '@opentelemetry/sdk-trace-node@2.8.0(@opentelemetry/api@1.9.1)':
     dependencies:
@@ -2525,10 +2525,10 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@trigger.dev/build@4.8.4(typescript@7.0.2)(zod@4.6.7)':
+  '@trigger.dev/build@4.8.5(typescript@7.0.2)(zod@4.6.7)':
     dependencies:
       '@prisma/config': 6.19.3
-      '@trigger.dev/core': 4.8.4(zod@4.6.7)
+      '@trigger.dev/core': 4.8.5(zod@4.6.7)
       mlly: 1.8.2
       pkg-types: 1.3.1
       tinyglobby: 0.2.17
@@ -2542,7 +2542,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@trigger.dev/core@4.8.4(zod@4.6.7)':
+  '@trigger.dev/core@4.8.5(zod@4.6.7)':
     dependencies:
       '@bugsnag/cuid': 3.2.2
       '@electric-sql/client': 1.3.0
@@ -2580,11 +2580,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@trigger.dev/sdk@4.8.4(ai@7.0.166(zod@4.6.7))(zod@4.6.7)':
+  '@trigger.dev/sdk@4.8.5(ai@7.0.166(zod@4.6.7))(zod@4.6.7)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.41.1
-      '@trigger.dev/core': 4.8.4(zod@4.6.7)
+      '@trigger.dev/core': 4.8.5(zod@4.6.7)
       uncrypto: 0.1.3
       zod: 4.6.7
     optionalDependencies:
